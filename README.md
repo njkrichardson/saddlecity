@@ -39,11 +39,10 @@ net = Hopfield()
 
 A network can be provided memories to memorize with the ```add_memories``` method. Here we add the following three memories corresponding to binary images of handwritten digits. 
 
-<img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_memories.png" alt="drawing" height="200" width="300" class="center"/>
+<img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_memories.png" alt="drawing" height="500" width="800" class="center"/>
 
 Recall that this is an unsupervised neural network model; and thus doesn't require any parameter estimation. We can now use the neural network to attempt to process and decode various stimuli corresponding to corrupted versions of the learned memories. 
-
-<img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_stimulus.png" alt="drawing" height="200" width="300" class="center"/>
+<img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_stimulus.png" alt="drawing" height="200" width="700" class="center"/>
 
 ```python 
 decoded = net.decode(stimulus) 
