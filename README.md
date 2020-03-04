@@ -42,6 +42,7 @@ A network can be provided memories to memorize with the ```add_memories``` metho
 <img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_memories.png" alt="drawing" height="500" width="800" class="center"/>
 
 Recall that this is an unsupervised neural network model; and thus doesn't require any parameter estimation. We can now use the neural network to attempt to process and decode various stimuli corresponding to corrupted versions of the learned memories. 
+
 <img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_stimulus.png" alt="drawing" height="400" width="500" class="center"/>
 
 ```python 
@@ -49,6 +50,7 @@ decoded = net.decode(stimulus)
 ```
 
 We can then visualize the processed stimulus, which has converged to the true memory corresponding to the stimulus. 
+
 <img src="https://raw.githubusercontent.com/njkrichardson/saddlecity/master/figures/mnist_decoded.png" alt="drawing" height="400" width="500" class="center"/>
 
 This example and more can be found in the ```examples``` directory. 
