@@ -1,6 +1,8 @@
 import numpy as np 
+import numpy.random as npr
 import matplotlib.pyplot as plt
 from copy import deepcopy
+from tqdm import tqdm
 
 class Hopfield: 
 
@@ -8,15 +10,16 @@ class Hopfield:
         self._dimension = dimension
         self.params = np.zeros((dimension, dimension)) if dimension is not None else None 
         self.max_iters = 100 
+        self.bias = 0.0
 
-    def __repr__(self):
-        if self.params is not None: 
-            plt.imshow(self.params, cmap='Greys')
-            plt.show()
+    # def __repr__(self):
+    #     if self.params is not None: 
+    #         plt.imshow(self.params, cmap='Greys')
+    #         plt.show()
 
-            return (f'{self.__class__.__name__}')
-        else: 
-            return (f'{self.__class__.__name__}')
+    #         return (f'{self.__class__.__name__}')
+    #     else: 
+    #         return (f'{self.__class__.__name__}')
         
     @property
     def dimension(self): 
@@ -35,15 +38,17 @@ class Hopfield:
         memories : list of np.ndarrays
             list of memories to be "memorized" by the neural net 
         """
-        self.memories = memories 
+        self.memories = deepcopy(memories)
+        base_activation = np.sum([np.sum(memory) for memory in self.memories]) / (len(self.memories) * self.dimension) 
         
         for memory in self.memories: 
+            memory -= base_activation
             self.params += np.outer(memory, memory)
 
-        self.params *= 1 / self.memories[0].shape[0]
+        self.params /= len(self.memories)
         np.fill_diagonal(self.params, 0)
 
-    def decode(self, inputs : np.ndarray, max_iters : int = 100):
+    def decode(self, inputs : np.ndarray, max_iters : int = 1000, bias : float = None) -> np.ndarray:
         """processes an input stimulus by updating the states of the neurons 
         according to the Hebbian learning rule. 
         
@@ -57,20 +62,39 @@ class Hopfield:
         
         Returns
         -------
-        processed inputs : np.ndarray (same shape as original inputs)
+        stimulus : np.ndarray (same shape as original inputs)
+            processed stimulus 
         """
-        for iter in range(max_iters): 
-            previous_inputs = deepcopy(inputs) 
-    
-            for i in range(self.dimension): 
-                activation = np.dot(self.params[i], inputs)
-                inputs[i] = 1 if activation >= 0 else -1 
+        if bias is not None: 
+            self.bias = bias
 
-            if np.all(previous_inputs == inputs): 
-                print("converged after {} iterations".format(iter+1))
-                break
+        stimulus = deepcopy(inputs)
+        
+        # initial network energy 
+        previous_energy = self.energy(stimulus)
 
-        return inputs
+        for i in tqdm(range(max_iters)): 
+            for j in range(100): 
+                # select a neuron to update
+                idx = npr.randint(0, self.dimension)
+                activation = np.dot(self.params[idx], stimulus) - self.bias
+                stimulus[idx] = 1 if activation >= 0 else -1
+
+            # current network energy 
+            current_energy = self.energy(stimulus)
+
+            # detect convergence 
+            if previous_energy == current_energy: 
+                return stimulus
+
+            # otherwise, update previous energy 
+            previous_energy = current_energy
+
+        return stimulus
+
+    def energy(self, state : np.ndarray) -> float: 
+        return -0.5 * (state @ self.params @ state) + np.sum(state * self.bias)
+
     
 
         
