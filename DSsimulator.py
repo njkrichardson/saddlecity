@@ -21,7 +21,7 @@ def generatesamp(s0, t_steps):
     """
     returns an array with x and y values for every timestep
     """
-    t=np.linspace(0,20)
+    t=np.linspace(0,t_steps)
     s=odeint(DE,s0,t)
     return s
 
@@ -31,11 +31,13 @@ def generate_data(batch_size,t_steps):
     """
     returns a batch_size x t_steps matrix
     """
+    #batch_size number of sequences, each w t_steps data points
     data = np.zeros((batch_size, t_steps,1), dtype =np.float32)
     for i in range(batch_size):
         s0 = [random.uniform(-1,1),random.uniform(-1,1)]
         s=generatesamp(s0, t_steps)
         for j in range(t_steps):
+            #data populated with x(t) for each t
             data[i][j]=s[j][1]
     return data
 
@@ -55,7 +57,7 @@ batch_size=10
 t_steps=10
 data=generate_data(batch_size,t_steps)
 input_seq, target_seq=input_and_target(data)
-#print("input: ", input_seq[0], "target: ", target_seq[0])
+#print("input: ", input_seq, "target: ", target_seq)
 input_seq=np.array(input_seq)
 #print("Input shape: {} --> (Batch Size, Sequence Length, One-Hot Encoding Size)".format(input_seq.shape))
 
@@ -63,7 +65,7 @@ input_seq=np.array(input_seq)
 #turn into tensors
 input_seq = torch.from_numpy(input_seq)
 target_seq = torch.Tensor(target_seq)
-#print("input: ", input_seq[0], "target: ", target_seq[0])
+print("input: ", len(input_seq[0]), "target: ", len(target_seq[0]))
 # torch.cuda.is_available() checks and returns a Boolean True if a GPU is available, else it'll return False
 is_cuda = torch.cuda.is_available()
 
@@ -113,7 +115,7 @@ class Model(nn.Module):
         return hidden
 
 # Instantiate the model with hyperparameters
-model = Model(input_size=1, output_size=9, hidden_dim=12, n_layers=1)
+model = Model(input_size=1, output_size=9, hidden_dim=10, n_layers=1)
 # We'll also set the model to the device that we defined earlier (default is CPU)
 model = model.to(device)
 
@@ -136,6 +138,7 @@ for epoch in range(1, n_epochs + 1):
     output = output.to(device)
     target_seq = target_seq.to(device)
     #getting the error index error: target -1 out of bounds
+    #print("output:", output, "target:", target_seq)
     loss = criterion(output, target_seq.view(-1).long())
     loss.backward() # Does backpropagation and calculates gradients
     optimizer.step() # Updates the weights accordingly
@@ -143,4 +146,7 @@ for epoch in range(1, n_epochs + 1):
     if epoch%10 == 0:
         print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
         print("Loss: {:.4f}".format(loss.item()))
+        print("output:", output[0], "target:", target_seq[0])
+ 
+
  
