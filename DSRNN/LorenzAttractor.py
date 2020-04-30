@@ -1,4 +1,3 @@
-
 from __future__ import unicode_literals, print_function, division
 from io import open
 import glob
@@ -134,7 +133,7 @@ model = Model(input_size=3, output_size=3, hidden_dim=10, n_layers=3)
 model = model.to(device)
 
 # Define hyperparameters
-n_epochs = 500
+n_epochs = 100
 lr=0.02
 
 # Define Loss, Optimizer
@@ -146,7 +145,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 input_seq = input_seq.to(device)
 outputs=[]
 losses=[]
-fig, axs = plt.subplots(5)
 for epoch in range(1, n_epochs + 1):  
     optimizer.zero_grad() # Clears existing gradients from previous epoch
     #input_seq = input_seq.to(device)
@@ -160,6 +158,7 @@ for epoch in range(1, n_epochs + 1):
     loss.backward() # Does backpropagation and calculates gradients
     optimizer.step() # Updates the weights accordingly
     losses += [loss.item()]
+    print(loss.item())
     #adaptive learning rate: decrease learning rate if cost increases, increase if it decreases
     #note that we decrease by more than we increase
     if epoch >=2:
@@ -167,21 +166,18 @@ for epoch in range(1, n_epochs + 1):
             lr = lr*(5/6)
         else:
                 lr=lr*1.1
-    if epoch%100 == 0:
-        print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
-        print("Loss: {:.4f}".format(loss.item()))
-        outputs.append(output[0].detach().numpy())  
-        print("learning rate:", lr)
-        if epoch == n_epochs:
-            t=target_seq[0].detach().numpy()
-            tx=[x[1] for x in t]
-            for i in range(len(outputs)):
-                axs[i].scatter(range(len(tx)), tx, label = 'target')
-                rgb = (random.random(), random.random(), random.random())
-                ox=[x[1] for x in outputs[i]]
-                axs[i].scatter(range(len(tx)), ox, label = str(i))
-                leg=plt.legend()
-            plt.show()
-        
-
- 
+def predict(size):
+    data=generate_data(1,1)
+    IC=torch.Tensor(data)
+    output_seq=[]
+    output_seq.append(IC[0])
+    for i in range(size):
+        out,hidden=model(IC)
+        IC=out
+        output_seq.append(IC[0])
+    return output_seq
+out=predict(100)
+ox=[x.detach().numpy()[0][0] for x in out]
+print(ox)
+plt.scatter(range(101),ox)
+plt.show()
